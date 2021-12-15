@@ -26,16 +26,22 @@ class Jogo(pygame.sprite.Sprite):
         self.direction = False
 
         self.Sprites = []
-        self.Sprites.append(pygame.image.load('img/john/jonh1.png'))
-        self.Sprites.append(pygame.image.load('img/john/jonh2.png'))
-        self.Sprites.append(pygame.image.load('img/john/jonh3.png'))
-        self.Sprites.append(pygame.image.load('img/john/jonh4.png'))
+        self.Sprites.append(pygame.image.load('img/john/john01.png'))
+        self.Sprites.append(pygame.image.load('img/john/john02.png'))
+        self.Sprites.append(pygame.image.load('img/john/john03.png'))
+        self.Sprites.append(pygame.image.load('img/john/john04.png'))
         self.image_atual = 0
+        self.jump_init = 380
         self.image = self.Sprites[self.image_atual]
         self.rect = self.image.get_rect()
         self.rect.topleft = self.pos_x, self.pos_y
         self.image = pygame.transform.scale(self.image, (80, 80))
         self.mover = False
+        self.jump = False
+
+
+    def jumper(self):
+        self.jump = True
 
     def mover_frente(self):
         self.mover = True
@@ -56,9 +62,20 @@ class Jogo(pygame.sprite.Sprite):
             self.rect.x = 10
 
     def update(self):
+        #Jump
+        if self.jump == True:
+            self.rect.y -= 15
+            if self.rect.y <= 300:
+                 self.jump = False
+        else:
+            if self.rect.y < self.jump_init:
+                self.rect.y += 10
+            else:
+                 self.rect.y = self.jump_init
+        #Animation
         if self.mover == True:
-            self.image_atual = (self.image_atual + 1) % 4
-            self.image = self.Sprites[self.image_atual]
+            self.image_atual = (self.image_atual + 0.5) % 4
+            self.image = self.Sprites[int(self.image_atual)]
             self.image = pygame.transform.scale(self.image, (80, 80))
         if not key[pygame.K_RIGHT]:
             self.mover = False
@@ -81,6 +98,7 @@ class BackGround(pygame.sprite.Sprite):
         self.rect.topleft = 0, 0
 
     def update(self):
+           #move map
         if jogo.rect.x >= 520 and key[pygame.K_RIGHT]:
             self.rect.x -= 10
         if jogo.rect.x >= 10 and key[pygame.K_LEFT]:
@@ -98,20 +116,20 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.position = 1
         self.direction = False
-        self.number_bullets = 3
+        self.number_bullets = 1
         self.bullets = []
         self.image = pygame.image.load('img/bullet.png')
         self.rect = self.image.get_rect()
         self.rect.topleft = jogo.rect.x + 52, jogo.rect.y + 32
 
     def update(self):
-      self.rect.x += 10
+      self.rect.x += 15
       if self.rect.x >= 700:
           self.kill()
 
 
 
-FPS = 6
+
 pygame.init()
 
 Player_Groups = pygame.sprite.Group()
@@ -129,11 +147,12 @@ Fundo_Group.add(plano_fund)
 relogio = pygame.time.Clock()
 
 while True:
-
-
+    relogio.tick(30)
+    relogio.get_time()
+    jump_sound = pygame.mixer.Sound('music/jump.flac')
     tiro_sound = pygame.mixer.Sound('music/bullet.wav')
     tela.fill((0, 0, 0))
-    relogio.tick(20)
+
 
     for event in pygame.event.get():
         if event.type == "Exit":
@@ -141,6 +160,14 @@ while True:
             sys.exit()
 
     key = pygame.key.get_pressed()
+    if key[pygame.K_UP]:
+
+        if jogo.rect.y != jogo.jump_init:
+            pass
+        else:
+         jogo.jumper()
+         jump_sound.play()
+
     if key[pygame.K_RIGHT]:
         jogo.mover_frente()
 
