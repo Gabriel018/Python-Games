@@ -10,7 +10,7 @@ pos_x = 100
 pos_y = 380
 
 tela = pygame.display.set_mode((height, width))
-
+number_bullets = 3
 
 class Jogo(pygame.sprite.Sprite):
 
@@ -72,11 +72,6 @@ class Jogo(pygame.sprite.Sprite):
           self.kill()
 
 
-
-
-
-
-
 class BackGround(pygame.sprite.Sprite):
 
     def __init__(self):
@@ -103,6 +98,7 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.position = 1
         self.direction = False
+        self.number_bullets = 3
         self.bullets = []
         self.image = pygame.image.load('img/bullet.png')
         self.rect = self.image.get_rect()
@@ -110,6 +106,8 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
       self.rect.x += 10
+      if self.rect.x >= 700:
+          self.kill()
 
 
 
@@ -132,6 +130,7 @@ relogio = pygame.time.Clock()
 
 while True:
 
+
     tiro_sound = pygame.mixer.Sound('music/bullet.wav')
     tela.fill((0, 0, 0))
     relogio.tick(20)
@@ -152,8 +151,9 @@ while True:
         pygame.quit()
 
     if key[pygame.K_SPACE]:
-        Bullet_Group.add(Bullet())
-        tiro_sound.play()
+        if len(Bullet_Group) < bullet.number_bullets:
+           Bullet_Group.add(Bullet())
+           tiro_sound.play()
 
     Fundo_Group.draw(tela)
     Fundo_Group.update()
