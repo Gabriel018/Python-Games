@@ -1,7 +1,5 @@
-
 import sys
 import pygame
-import self
 from pygame import *
 
 height = 700
@@ -11,6 +9,7 @@ pos_y = 380
 
 tela = pygame.display.set_mode((height, width))
 number_bullets = 3
+
 
 class Jogo(pygame.sprite.Sprite):
 
@@ -39,7 +38,6 @@ class Jogo(pygame.sprite.Sprite):
         self.mover = False
         self.jump = False
 
-
     def jumper(self):
         self.jump = True
 
@@ -62,17 +60,17 @@ class Jogo(pygame.sprite.Sprite):
             self.rect.x = 10
 
     def update(self):
-        #Jump
+        # Jump
         if self.jump == True:
             self.rect.y -= 15
             if self.rect.y <= 300:
-                 self.jump = False
+                self.jump = False
         else:
             if self.rect.y < self.jump_init:
                 self.rect.y += 10
             else:
-                 self.rect.y = self.jump_init
-        #Animation
+                self.rect.y = self.jump_init
+        # Animation
         if self.mover == True:
             self.image_atual = (self.image_atual + 0.5) % 4
             self.image = self.Sprites[int(self.image_atual)]
@@ -82,11 +80,11 @@ class Jogo(pygame.sprite.Sprite):
 
     def draw(self):
         if self.direction == True:
-          tela.blit(pygame.transform.flip(self.image,self.direction,False),self.rect)
-          self.kill()
+            tela.blit(pygame.transform.flip(self.image, self.direction, False), self.rect)
+            self.kill()
         if self.direction == False:
-          tela.blit(self.image,self.rect)
-          self.kill()
+            tela.blit(self.image, self.rect)
+            self.kill()
 
 
 class BackGround(pygame.sprite.Sprite):
@@ -98,7 +96,7 @@ class BackGround(pygame.sprite.Sprite):
         self.rect.topleft = 0, 0
 
     def update(self):
-           #move map
+        # move map
         if jogo.rect.x >= 520 and key[pygame.K_RIGHT]:
             self.rect.x -= 10
         if jogo.rect.x >= 10 and key[pygame.K_LEFT]:
@@ -115,19 +113,30 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.position = 1
-        self.direction = False
+        self.direction = -1 if jogo.direction else 1  # DIRECTION OF JOGO WHEN BULLET FIRED
         self.number_bullets = 1
         self.bullets = []
         self.image = pygame.image.load('img/bullet.png')
         self.rect = self.image.get_rect()
-        self.rect.topleft = jogo.rect.x + 52, jogo.rect.y + 32
+        # bullet x: add to 53 to jogo position if jogo facing right (jogo.diredction = False) or add 0 to jogo position if jogo facing left
+        self.rect.topleft = jogo.rect.x if jogo.direction else jogo.rect.x + 53, jogo.rect.y + 32
 
     def update(self):
-      self.rect.x += 15
-      if self.rect.x >= 700:
-          self.kill()
+        self.rect.x += self.direction * 15
+        # if bullet goes out of right or left side of screen
+        if self.rect.x >= 700 or self.rect.x < 0:
+            self.kill()
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('img/enemy/enemy01.png')
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos_x + 300 ,pos_y  - 10
+        self.image = pygame.transform.scale(self.image, (42*3,38*3 ))
 
+    def update(self):
+        self.rect.x += -1
 
 
 pygame.init()
@@ -139,6 +148,11 @@ Player_Groups.add(jogo)
 Bullet_Group = pygame.sprite.Group()
 bullet = Bullet()
 Bullet_Group.add(bullet)
+
+Enemy_Group = pygame.sprite.Group()
+enemy = Enemy()
+Enemy_Group.add(enemy)
+
 
 Fundo_Group = pygame.sprite.Group()
 plano_fund = BackGround()
@@ -153,7 +167,6 @@ while True:
     tiro_sound = pygame.mixer.Sound('music/bullet.wav')
     tela.fill((0, 0, 0))
 
-
     for event in pygame.event.get():
         if event.type == "Exit":
             pygame.quit()
@@ -165,8 +178,8 @@ while True:
         if jogo.rect.y != jogo.jump_init:
             pass
         else:
-         jogo.jumper()
-         jump_sound.play()
+            jogo.jumper()
+            jump_sound.play()
 
     if key[pygame.K_RIGHT]:
         jogo.mover_frente()
@@ -179,8 +192,8 @@ while True:
 
     if key[pygame.K_SPACE]:
         if len(Bullet_Group) < bullet.number_bullets:
-           Bullet_Group.add(Bullet())
-           tiro_sound.play()
+            Bullet_Group.add(Bullet())
+            tiro_sound.play()
 
     Fundo_Group.draw(tela)
     Fundo_Group.update()
@@ -188,12 +201,13 @@ while True:
     Player_Groups.draw(tela)
     Player_Groups.update()
 
+    Enemy_Group.draw(tela)
+    Enemy_Group.update()
+
     Bullet_Group.draw(tela)
     Bullet_Group.update()
 
     jogo.draw()
     jogo.update()
 
-
     pygame.display.update()
-
