@@ -15,8 +15,18 @@ number_bullets = 3
 #Sprites
 sprites_player = pygame.image.load('img/john/persona001.png')
 sprites_enemy = pygame.image.load('img/enemy/monster01.png')
-
 sprites_enemy01 = pygame.image.load('img/enemy/monster02.png')
+
+pontos = 0
+
+
+veloc_jogo = 4
+
+def Mgs_Game(msg,size,color):
+    font =  pygame.font.SysFont('Arial',40)
+    mensagem = f'Pontos {msg}'
+    txt_format = font.render(mensagem,True,color)
+    return  txt_format
 
 class Jogo(pygame.sprite.Sprite):
 
@@ -155,7 +165,7 @@ class Enemy01(pygame.sprite.Sprite):
 
     def update(self):
       if self.escolha == 1:
-         self.rect.x -= 4
+         self.rect.x -= veloc_jogo
          self.image_atual = (self.image_atual + 0.25) % 4
          self.image = self.sprites_monster[int(self.image_atual)]
          self.image = pygame.transform.scale(self.image, (80, 80))
@@ -184,7 +194,7 @@ class Enemy_lagarto(pygame.sprite.Sprite):
 
     def update(self):
       if self.escolha == 2:
-          self.rect.x +=4
+          self.rect.x += veloc_jogo
           self.image_atual = (self.image_atual + 0.25) % 4
           self.image = self.sprite_monster[int(self.image_atual)]
           self.image = pygame.transform.scale(self.image, (80, 48))
@@ -229,7 +239,7 @@ while True:
 
     colission = pygame.sprite.spritecollide(enemy01,Bullet_Group,False)
     colission1 = pygame.sprite.spritecollide(enemy,Bullet_Group,False)
-    colission_enemy = pygame.sprite.spritecollide(jogo,Enemy_Group,False)
+
 
     #Sounds
     enemy_lagarto = pygame.mixer.Sound('music/enemy_lagarto.wav')
@@ -247,12 +257,14 @@ while True:
             sys.exit()
     #colision
     if colission:
+      pontos += 10
       enemy01.draw()
       enemy_lagarto.play()
 
     if colission1:
-      enemy.draw()
-      enemy_kill.play()
+       pontos +=10
+       enemy.draw()
+       enemy_kill.play()
     #choice
     if  colission or colission1:
         choice_enemy = choice([1,2])
@@ -261,6 +273,11 @@ while True:
         enemy.escolha = choice_enemy
         enemy01.escolha = choice_enemy
 
+
+    if pontos == 100:
+        veloc_jogo += 1
+    if pontos == 200:
+        veloc_jogo += 1
 
 
     key = pygame.key.get_pressed()
@@ -288,6 +305,8 @@ while True:
             tiro_sound.play()
 
 
+
+
     Fundo_Group.draw(tela)
     Fundo_Group.update()
 
@@ -307,4 +326,6 @@ while True:
     jogo.draw()
     jogo.update()
 
+    txt_pontos =  Mgs_Game(pontos,50,(255,255,255))
+    tela.blit(txt_pontos,(600,50))
     pygame.display.update()
