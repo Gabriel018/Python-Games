@@ -1,6 +1,6 @@
 import sys
 import pygame
-from random import *
+from random import randrange,choice
 from pygame import *
 
 height = 800
@@ -9,7 +9,8 @@ pos_x = 100
 pos_y = 380
 
 tela = pygame.display.set_mode((height, width))
-
+#Escolha inimigo
+choice_enemy = choice([1,2])
 number_bullets = 3
 #Sprites
 sprites_player = pygame.image.load('img/john/persona001.png')
@@ -65,8 +66,6 @@ class Jogo(pygame.sprite.Sprite):
             self.rect.x = 10
 
     def update(self):
-
-
         # Jump
         if self.jump == True:
             self.rect.y -= 10
@@ -134,7 +133,7 @@ class Bullet(pygame.sprite.Sprite):
        self.rect.x  += 10
        self.rect.x += self.direction * 25
         # if bullet goes out of right or left side of screen
-       if self.rect.x >= 700 or self.rect.x < 0:
+       if self.rect.x >= 800 or self.rect.x < 0:
             self.kill()
 
 
@@ -147,6 +146,7 @@ class Enemy01(pygame.sprite.Sprite):
          img = sprites_enemy.subsurface((i * 72, 0), (70, 80))
          self.sprites_monster.append(img)
          self.image_atual = 0
+         self.escolha = choice_enemy
          self.image = self.sprites_monster[self.image_atual]
          self.rect = self.image.get_rect()
          self.rect.y = pos_y - 10
@@ -154,20 +154,17 @@ class Enemy01(pygame.sprite.Sprite):
 
 
     def update(self):
-        self.rect.x -= 3
-        self.image_atual = (self.image_atual + 0.25) % 4
-        self.image = self.sprites_monster[int(self.image_atual)]
-        self.image = pygame.transform.scale(self.image, (80, 80))
-
-        if self.rect.topright[0] <= 0:
-            self.rect.x = randrange(600, 1200, 90)
-
+      if self.escolha == 1:
+         self.rect.x -= 4
+         self.image_atual = (self.image_atual + 0.25) % 4
+         self.image = self.sprites_monster[int(self.image_atual)]
+         self.image = pygame.transform.scale(self.image, (80, 80))
+         if self.rect.topright[0] <= 0:
+             self.rect.x = randrange(600, 1200, 90)
 
     def draw(self):
+        self.rect.x = randrange(800, 1200, 90)
 
-        self.rect.x = randrange(699, 1200, 90)
-        if self.rect.x <= 0:
-           self.rect.x += 3
 
 
 class Enemy_lagarto(pygame.sprite.Sprite):
@@ -178,19 +175,25 @@ class Enemy_lagarto(pygame.sprite.Sprite):
             img = sprites_enemy01.subsurface((i * 48,00),(40,24))
             self.sprite_monster.append(img)
             self.image_atual = 0
+            self.escolha = choice_enemy
             self.image = self.sprite_monster[self.image_atual]
             self.rect = self.image.get_rect()
             self.rect.y = pos_y + 20
-            self.rect.x = pos_x + 120
+            self.rect.x = pos_x - 120
             self.image = pygame.transform.scale(self.image, (80, 48))
 
     def update(self):
-         self.rect.x -=5
-         self.image_atual = (self.image_atual + 0.25) % 4
-         self.image = self.sprite_monster[int(self.image_atual)]
-         self.image = pygame.transform.scale(self.image, (80, 48))
-         if self.rect.topright[0] <= 0:
-            self.rect.x = randrange(600, 1200, 90)
+      if self.escolha == 2:
+          self.rect.x +=4
+          self.image_atual = (self.image_atual + 0.25) % 4
+          self.image = self.sprite_monster[int(self.image_atual)]
+          self.image = pygame.transform.scale(self.image, (80, 48))
+          self.image = pygame.transform.flip(self.image, True, False)
+          if self.rect.topleft[0] >= 800:
+            self.rect.x = randrange(-400, -100, 100)
+
+    def draw(self):
+        self.rect.x = randrange(-400, -100, 100)
 
 
 
@@ -213,13 +216,9 @@ Enemy_Group01 = pygame.sprite.Group()
 enemy01 = Enemy_lagarto()
 Enemy_Group01.add(enemy01)
 
-
-
 Fundo_Group = pygame.sprite.Group()
 plano_fund = BackGround()
 Fundo_Group.add(plano_fund)
-
-
 
 relogio = pygame.time.Clock()
 
@@ -228,9 +227,12 @@ while True:
     relogio.get_time()
 
 
-    colission = pygame.sprite.spritecollide(enemy,Bullet_Group,False)
+    colission = pygame.sprite.spritecollide(enemy01,Bullet_Group,False)
+    colission1 = pygame.sprite.spritecollide(enemy,Bullet_Group,False)
     colission_enemy = pygame.sprite.spritecollide(jogo,Enemy_Group,False)
+
     #Sounds
+    enemy_lagarto = pygame.mixer.Sound('music/enemy_lagarto.wav')
     to_die = pygame.mixer.Sound('music/dead.wav')
     enemy_kill = pygame.mixer.Sound('music/enemy_kill.wav')
     enemy_kill.set_volume(0.3)
@@ -243,10 +245,22 @@ while True:
         if event.type == "Exit":
             pygame.quit()
             sys.exit()
-
+    #colision
     if colission:
+      enemy01.draw()
+      enemy_lagarto.play()
+
+    if colission1:
       enemy.draw()
       enemy_kill.play()
+    #choice
+    if  colission or colission1:
+        choice_enemy = choice([1,2])
+        enemy.rect.x = randrange(600, 1200, 90)
+        enemy01.rect.x = randrange(-400, -100, 100)
+        enemy.escolha = choice_enemy
+        enemy01.escolha = choice_enemy
+
 
 
     key = pygame.key.get_pressed()
