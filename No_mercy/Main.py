@@ -1,9 +1,10 @@
 import sys
 import pygame
+from random import *
 from pygame import *
 
-height = 700
-width = 500
+height = 800
+width = 600
 pos_x = 100
 pos_y = 380
 
@@ -13,15 +14,18 @@ number_bullets = 3
 #Sprites
 sprites_player = pygame.image.load('img/john/persona001.png')
 sprites_enemy = pygame.image.load('img/enemy/monster01.png')
+
+sprites_enemy01 = pygame.image.load('img/enemy/monster02.png')
+
 class Jogo(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         music_fundo = pygame.mixer.music.load('music/music-battle.mp3')
-        pygame.mixer.music.set_volume(0.4)
-        #pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_volume(0.3)
+        pygame.mixer.music.play(-1)
         self.pos_x = 100
-        self.pos_y = 370
+        self.pos_y = 380
         self.position = 1
         self.direction = False
 
@@ -30,10 +34,11 @@ class Jogo(pygame.sprite.Sprite):
             img = sprites_player.subsurface((i * 32,0),(23,31))
             self.Sprites.append(img)
             self.image_atual = 0
-            self.jump_init = 370
+            self.jump_init = 380
             self.image = self.Sprites[self.image_atual]
             self.rect = self.image.get_rect()
-            self.rect.topleft = pos_x  ,pos_y  - 30
+            self.rect.x = pos_x
+            self.rect.y = pos_y  + 20
             self.image = pygame.transform.scale(self.image, (80, 80))
             self.mover = False
             self.jump = False
@@ -60,13 +65,12 @@ class Jogo(pygame.sprite.Sprite):
             self.rect.x = 10
 
     def update(self):
-        if self.rect.colliderect(enemy):
-            self.kill()
+
 
         # Jump
         if self.jump == True:
-            self.rect.y -= 30
-            if self.rect.y <= 300:
+            self.rect.y -= 10
+            if self.rect.y <= 270:
                 self.jump = False
         else:
             if self.rect.y < self.jump_init:
@@ -108,8 +112,8 @@ class BackGround(pygame.sprite.Sprite):
         if self.rect.x >= 0 and jogo.rect.x >= 10:
             self.rect.x = 0
 
-        if self.rect.x <= -1700 and jogo.rect.x >= 520:
-            self.rect.x = -1700
+        if self.rect.x <= -1500 and jogo.rect.x >= 520:
+            self.rect.x = -1500
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -117,39 +121,76 @@ class Bullet(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.position = 1
         self.direction = -1 if jogo.direction else 1  # DIRECTION OF JOGO WHEN BULLET FIRED
-        self.number_bullets = 1
         self.bullets = []
+        self.number_bullets = 2
         self.image = pygame.image.load('img/bullet.png')
         self.rect = self.image.get_rect()
         # bullet x: add to 53 to jogo position if jogo facing right (jogo.diredction = False) or add 0 to jogo position if jogo facing left
-        self.rect.topleft = jogo.rect.x if jogo.direction else jogo.rect.x + 53, jogo.rect.y + 32
+        self.rect.midright = jogo.rect.x if jogo.direction else jogo.rect.x + 53, jogo.rect.y + 40
+
+
 
     def update(self):
-        self.rect.x += self.direction * 15
+       self.rect.x  += 10
+       self.rect.x += self.direction * 25
         # if bullet goes out of right or left side of screen
-        if self.rect.x >= 700 or self.rect.x < 0:
+       if self.rect.x >= 700 or self.rect.x < 0:
             self.kill()
 
-class Enemy(pygame.sprite.Sprite):
+
+
+class Enemy01(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.sprites_monster = []
         for i in range(4):
-         img = sprites_enemy.subsurface((i * 70, 0), (70, 80))
+         img = sprites_enemy.subsurface((i * 72, 0), (70, 80))
          self.sprites_monster.append(img)
          self.image_atual = 0
          self.image = self.sprites_monster[self.image_atual]
          self.rect = self.image.get_rect()
-         self.rect.center = pos_x + 300 ,pos_y  + 30
-         self.image = pygame.transform.scale(self.image, (200, 100))
+         self.rect.y = pos_y - 10
+         self.rect.x = pos_x
+
 
     def update(self):
-        self.image_atual = (self.image_atual + 0.5) % 4
-
+        self.rect.x -= 3
+        self.image_atual = (self.image_atual + 0.25) % 4
         self.image = self.sprites_monster[int(self.image_atual)]
         self.image = pygame.transform.scale(self.image, (80, 80))
-        if self.rect.colliderect(bullet):
-            enemy_kill.play()
+
+        if self.rect.topright[0] <= 0:
+            self.rect.x = randrange(600, 1200, 90)
+
+
+    def draw(self):
+
+        self.rect.x = randrange(699, 1200, 90)
+        if self.rect.x <= 0:
+           self.rect.x += 3
+
+
+class Enemy_lagarto(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.sprite_monster = []
+        for i in range(4):
+            img = sprites_enemy01.subsurface((i * 48,00),(40,24))
+            self.sprite_monster.append(img)
+            self.image_atual = 0
+            self.image = self.sprite_monster[self.image_atual]
+            self.rect = self.image.get_rect()
+            self.rect.y = pos_y + 20
+            self.rect.x = pos_x + 120
+            self.image = pygame.transform.scale(self.image, (80, 48))
+
+    def update(self):
+         self.rect.x -=5
+         self.image_atual = (self.image_atual + 0.25) % 4
+         self.image = self.sprite_monster[int(self.image_atual)]
+         self.image = pygame.transform.scale(self.image, (80, 48))
+         if self.rect.topright[0] <= 0:
+            self.rect.x = randrange(600, 1200, 90)
 
 
 
@@ -165,13 +206,20 @@ bullet = Bullet()
 Bullet_Group.add(bullet)
 
 Enemy_Group = pygame.sprite.Group()
-enemy = Enemy()
+enemy = Enemy01()
 Enemy_Group.add(enemy)
+
+Enemy_Group01 = pygame.sprite.Group()
+enemy01 = Enemy_lagarto()
+Enemy_Group01.add(enemy01)
+
 
 
 Fundo_Group = pygame.sprite.Group()
 plano_fund = BackGround()
 Fundo_Group.add(plano_fund)
+
+
 
 relogio = pygame.time.Clock()
 
@@ -179,18 +227,27 @@ while True:
     relogio.tick(30)
     relogio.get_time()
 
+
+    colission = pygame.sprite.spritecollide(enemy,Bullet_Group,False)
+    colission_enemy = pygame.sprite.spritecollide(jogo,Enemy_Group,False)
+    #Sounds
+    to_die = pygame.mixer.Sound('music/dead.wav')
     enemy_kill = pygame.mixer.Sound('music/enemy_kill.wav')
+    enemy_kill.set_volume(0.3)
     jump_sound = pygame.mixer.Sound('music/jump.flac')
     tiro_sound = pygame.mixer.Sound('music/bullet.wav')
+
     tela.fill((0, 0, 0))
-
-
-
 
     for event in pygame.event.get():
         if event.type == "Exit":
             pygame.quit()
             sys.exit()
+
+    if colission:
+      enemy.draw()
+      enemy_kill.play()
+
 
     key = pygame.key.get_pressed()
     if key[pygame.K_UP]:
@@ -216,6 +273,7 @@ while True:
             Bullet_Group.add(Bullet())
             tiro_sound.play()
 
+
     Fundo_Group.draw(tela)
     Fundo_Group.update()
 
@@ -224,6 +282,10 @@ while True:
 
     Enemy_Group.draw(tela)
     Enemy_Group.update()
+
+    Enemy_Group01.draw(tela)
+    Enemy_Group01.update()
+
 
     Bullet_Group.draw(tela)
     Bullet_Group.update()
