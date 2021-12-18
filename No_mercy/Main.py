@@ -20,14 +20,22 @@ sprites_enemy01 = pygame.image.load('img/enemy/monster02.png')
 
 pontos = 0
 
+game_over = False
 
-veloc_jogo = 4
-
+#Menssenger
 def Mgs_Game(msg,size,color):
     font =  pygame.font.SysFont('Arial',40)
     mensagem = f'Pontos {msg}'
     txt_format = font.render(mensagem,True,color)
     return  txt_format
+
+def Game_over():
+ if game_over == True:
+    font = pygame.font.SysFont('Arial', 40)
+    Game_over_txt = font.render('Game Over',True,(255,255,255))
+    tela.blit(Game_over_txt,(width/2,height/2))
+
+
 
 class Jogo(pygame.sprite.Sprite):
 
@@ -208,8 +216,6 @@ while True:
     jump_sound = pygame.mixer.Sound('music/jump.flac')
     tiro_sound = pygame.mixer.Sound('music/bullet.wav')
 
-    tela.fill((0, 0, 0))
-
     for event in pygame.event.get():
         if event.type == "Exit":
             pygame.quit()
@@ -236,9 +242,13 @@ while True:
         enemy_fly_sound.play()
 
     if colission_player:
+        game_over = True
         pontos = 0
         jogo.rect.x = 0
         to_die.play()
+        Game_over()
+
+
 
 
 
@@ -254,11 +264,6 @@ while True:
         enemy_lagarto.escolha = choice_enemy
         enemy_contra.escolha = choice_enemy
         enemy_fly.escolha = choice_enemy
-
-
-    if pontos == 100:
-        veloc_jogo += 1
-        print(veloc_jogo)
 
 
     key = pygame.key.get_pressed()
@@ -311,7 +316,7 @@ while True:
 
     jogo.draw()
     jogo.update()
-
-    txt_pontos =  Mgs_Game(pontos,50,(255,255,255))
-    tela.blit(txt_pontos,(600,50))
+    Game_over()
+    txt_pontos = Mgs_Game(pontos, 50, (255, 255, 255))
+    tela.blit(txt_pontos, (600, 50))
     pygame.display.update()

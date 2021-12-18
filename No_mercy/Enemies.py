@@ -40,6 +40,7 @@ class Enemy01(pygame.sprite.Sprite):
 
 
     def update(self):
+
       if self.escolha == 1:
          self.rect.x -= veloc_jogo
          self.image_atual = (self.image_atual + 0.25) % 4
@@ -69,7 +70,6 @@ class Enemy_lagarto(pygame.sprite.Sprite):
     def update(self):
 
       if self.escolha == 2:
-          pygame.draw.rect(tela, (128, 0, 0), self.rect, 1)
           self.rect.x += veloc_jogo
           self.image_atual = (self.image_atual + 0.25) % 4
           self.image = self.sprite_monster[int(self.image_atual)]
