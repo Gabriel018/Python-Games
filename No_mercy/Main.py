@@ -31,9 +31,24 @@ def Mgs_Game(msg,size,color):
 
 def Game_over():
  if game_over == True:
-    font = pygame.font.SysFont('Arial', 40)
-    Game_over_txt = font.render('Game Over',True,(255,255,255))
-    tela.blit(Game_over_txt,(width/2,height/2))
+    font = pygame.font.SysFont('Lobster', 60)
+    Game_over_txt = font.render('Game Over',False,(255,255,255))
+    tela.blit(Game_over_txt,(width/2,100))
+
+def restart():
+    music_fundo = pygame.mixer.music.load('music/music-battle.mp3')
+    pygame.mixer.music.set_volume(0.3)
+    pygame.mixer.music.play(-1)
+    #choice
+    choice_enemy = choice([1, 2, 3, 4])
+    enemy.rect.x = randrange(800, 1200, 90)
+    enemy_lagarto.rect.x = randrange(-400, -100, 100)
+    enemy_contra.rect.x = randrange(800, 1200, 90)
+    enemy_fly.rect.x = randrange(-400, -100, 100)
+    enemy.escolha = choice_enemy
+    enemy_lagarto.escolha = choice_enemy
+    enemy_contra.escolha = choice_enemy
+    enemy_fly.escolha = choice_enemy
 
 
 
@@ -43,7 +58,7 @@ class Jogo(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         music_fundo = pygame.mixer.music.load('music/music-battle.mp3')
         pygame.mixer.music.set_volume(0.3)
-        #pygame.mixer.music.play(-1)
+        pygame.mixer.music.play(-1)
         self.pos_x = 100
         self.pos_y = 380
         self.position = 1
@@ -189,14 +204,15 @@ Fundo_Group = pygame.sprite.Group()
 plano_fund = BackGround()
 Fundo_Group.add(plano_fund)
 
-
-
 Group_All_Enemy = pygame.sprite.Group()
 Group_All_Enemy.add(enemy,enemy_contra,enemy_lagarto,enemy_fly)
 
 relogio = pygame.time.Clock()
 
+
+
 while True:
+
     relogio.tick(30)
     relogio.get_time()
 
@@ -204,9 +220,10 @@ while True:
     colission1 = pygame.sprite.spritecollide(enemy_contra,Bullet_Group,False)
     colission2 = pygame.sprite.spritecollide(enemy_lagarto,Bullet_Group,False)
     colission3 = pygame.sprite.spritecollide(enemy_fly,Bullet_Group,False)
-    colission_player = pygame.sprite.spritecollide(jogo,Group_All_Enemy,False)
+    colission_player = pygame.sprite.spritecollide(jogo,Group_All_Enemy,True)
 
     #Sounds
+
     enemy_fly_sound = pygame.mixer.Sound('music/enemy_fly.wav')
     enemy_contra_sound = pygame.mixer.Sound('music/enemy_contra.wav')
     enemy_lagarto_sound = pygame.mixer.Sound('music/enemy_lagarto.wav')
@@ -242,14 +259,13 @@ while True:
         enemy_fly_sound.play()
 
     if colission_player:
-        game_over = True
-        pontos = 0
-        jogo.rect.x = 0
-        to_die.play()
-        Game_over()
-
-
-
+          game_over = True
+          pontos = 0
+          jogo.rect.x = 0
+          to_die.play()
+          jogo.kill()
+          game_over_soundd = pygame.mixer.music.load('music/game_over-sound.mp3')
+          pygame.mixer.music.play(-1)
 
 
     #choice
@@ -275,6 +291,11 @@ while True:
             jogo.jumper()
             jump_sound.play()
 
+    if key[pygame.K_1]:
+        game_over = False
+        pygame.mixer.music.stop()
+        restart()
+
 
     if key[pygame.K_RIGHT]:
         jogo.move_front()
@@ -291,31 +312,18 @@ while True:
             tiro_sound.play()
 
 
-
-
     Fundo_Group.draw(tela)
     Fundo_Group.update()
 
-    Player_Groups.draw(tela)
-    Player_Groups.update()
+    if game_over == False:
+     Group_All_Enemy.draw(tela)
+     Group_All_Enemy.update()
 
-    Enemy_Group.draw(tela)
-    Enemy_Group.update()
+     Bullet_Group.draw(tela)
+     Bullet_Group.update()
 
-    Enemy_Group01.draw(tela)
-    Enemy_Group01.update()
-
-    Enemy_Group02.draw(tela)
-    Enemy_Group02.update()
-
-    Enemy_Group03.draw(tela)
-    Enemy_Group03.update()
-
-    Bullet_Group.draw(tela)
-    Bullet_Group.update()
-
-    jogo.draw()
-    jogo.update()
+     jogo.draw()
+     jogo.update()
     Game_over()
     txt_pontos = Mgs_Game(pontos, 50, (255, 255, 255))
     tela.blit(txt_pontos, (600, 50))
