@@ -3,7 +3,6 @@ import pygame
 from random import randrange,choice
 from pygame import *
 
-
 height = 800
 width = 600
 pos_x = 100
@@ -20,9 +19,11 @@ sprites_enemy = pygame.image.load('img/enemy/monster01.png')
 sprites_enemy01 = pygame.image.load('img/enemy/monster02.png')
 sprite_enemy02 = pygame.image.load('img/enemy/monster_contra.png')
 sprite_enemy03 = pygame.image.load('img/enemy/monster_fly.png')
-
+sprite_monster04 = pygame.image.load('img/enemy/big_monster.png')
+Boss = False
 pontos = 0
 veloc_jogo = 4
+
 
 class Enemy01(pygame.sprite.Sprite):
     def __init__(self):
@@ -64,7 +65,7 @@ class Enemy_lagarto(pygame.sprite.Sprite):
             self.image = self.sprite_monster[self.image_atual]
             self.rect = self.image.get_rect()
             self.rect.y = pos_y + 20
-            self.rect.x = pos_x - 120
+            self.rect.x = width
             self.image = pygame.transform.scale(self.image, (80, 48))
 
     def update(self):
@@ -75,7 +76,7 @@ class Enemy_lagarto(pygame.sprite.Sprite):
           self.image = self.sprite_monster[int(self.image_atual)]
           self.image = pygame.transform.scale(self.image, (80, 48))
           self.image = pygame.transform.flip(self.image, True, False)
-          if self.rect.topleft[0] >= 800:
+          if self.rect.topleft[0] >= width:
             self.rect.x = randrange(-400, -100, 100)
 
     def draw(self):
@@ -96,7 +97,7 @@ class Monster_contra(pygame.sprite.Sprite):
           self.image = self.sprite_monster[self.image_atual]
           self.rect = self.image.get_rect()
           self.rect.y = pos_y - 30
-          self.rect.x =  width
+          self.rect.x =  pos_x + 800
 
     def update(self):
      if self.escolha == 3:
@@ -105,11 +106,11 @@ class Monster_contra(pygame.sprite.Sprite):
         self.image = self.sprite_monster[int(self.image_atual)]
         self.image = pygame.transform.scale(self.image, (110, 110))
         if self.rect.topright[0] <= 0:
-            self.rect.x = randrange(800, 1200, 90)
+            self.rect.x = randrange(width, 1200, 90)
 
     def draw(self):
         self.image = pygame.transform.scale(self.image, (210, 110))
-        self.rect.x = randrange(800, 1200, 90)
+        self.rect.x = randrange(width, 1200, 90)
 
 class Monster_fly(pygame.sprite.Sprite):
     def __init__(self):
@@ -139,3 +140,4 @@ class Monster_fly(pygame.sprite.Sprite):
 
     def draw(self):
         self.rect.x = randrange(-400, -100, 100)
+
