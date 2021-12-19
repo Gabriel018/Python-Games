@@ -20,8 +20,8 @@ sprites_enemy01 = pygame.image.load('img/enemy/monster02.png')
 sprite_enemy02 = pygame.image.load('img/enemy/monster_contra.png')
 sprite_enemy03 = pygame.image.load('img/enemy/monster_fly.png')
 sprite_monster04 = pygame.image.load('img/enemy/big_monster.png')
-Boss = False
-pontos = 0
+
+
 veloc_jogo = 6
 
 
