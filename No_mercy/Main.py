@@ -1,4 +1,7 @@
 import sys
+import time
+
+from time import  sleep
 import pygame
 from random import randrange,choice
 from pygame import *
@@ -22,12 +25,22 @@ pontos = 0
 
 game_over = False
 boss = False
+Mgs_Boss = False
+game_timer = 0
 #Menssenger
 def Mgs_Game(msg,size,color):
     font =  pygame.font.SysFont('Arial',40)
     mensagem = f'Pontos {msg}'
     txt_format = font.render(mensagem,True,color)
     return  txt_format
+
+def Boss_msg():
+ if boss == True and Mgs_Boss == True:
+    font = pygame.font.SysFont('Lobster', 70)
+    Boss_txt = font.render('The Boss 01', False, (0, 128, 128))
+    tela.blit(Boss_txt, (250, 100))
+    Boss_txt = font.render('Prepara-te', False, (0, 128, 128))
+    tela.blit(Boss_txt, (200, 200))
 
 def Game_over():
  if game_over == True:
@@ -40,6 +53,7 @@ def Game_over():
     tela.blit(Game_over_txt, ( 200, 200))
 
 def restart():
+
     music_fundo = pygame.mixer.music.load('music/music-battle.mp3')
     pygame.mixer.music.set_volume(0.3)
     pygame.mixer.music.play(-1)
@@ -177,6 +191,8 @@ class Bullet(pygame.sprite.Sprite):
        if self.rect.x >= 800 or self.rect.x < 0:
             self.kill()
 
+
+
 class Big_monster(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -194,7 +210,7 @@ class Big_monster(pygame.sprite.Sprite):
 
     def update(self):
         if boss == True:
-            self.rect.x -= 1
+            self.rect.x -= 2
             self.image_atual = (self.image_atual + 0.10) % 3
             self.image = self.sprites_monster[int(self.image_atual)]
             if self.rect.topright[0] <= 0:
@@ -245,7 +261,6 @@ Group_All_Enemy.add(enemy,enemy_contra,enemy_lagarto,enemy_fly)
 
 relogio = pygame.time.Clock()
 
-
 FPS = 60
 
 while True:
@@ -253,6 +268,7 @@ while True:
     relogio.tick(30)
     relogio.get_time()
 
+    print(game_timer)
     colission = pygame.sprite.spritecollide(enemy,Bullet_Group,False)
     colission1 = pygame.sprite.spritecollide(enemy_contra,Bullet_Group,False)
     colission2 = pygame.sprite.spritecollide(enemy_lagarto,Bullet_Group,False)
@@ -276,6 +292,9 @@ while True:
         if event.type == "Exit":
             pygame.quit()
             sys.exit()
+
+
+
     #colision
     if colission:
       pontos += 10
@@ -318,8 +337,13 @@ while True:
         big_monster.kill()
 
 
-    if pontos == 100:
+    if pontos == 50:
        boss = True
+       Mgs_Boss = True
+       game_timer = pygame.time.get_ticks()
+
+    if game_timer > 13000:
+        Mgs_Boss = False
 
     #choice
     if  colission or colission1 or colission2 or colission3:
@@ -369,9 +393,9 @@ while True:
     Fundo_Group.update()
     Enemy_Group04.draw(tela)
     Enemy_Group04.update()
-    if game_over == False:
-      Group_All_Enemy.draw(tela)
-      Group_All_Enemy.update()
+    if  game_over == False and boss == False :
+       Group_All_Enemy.draw(tela)
+       Group_All_Enemy.update()
 
     Bullet_Group.draw(tela)
     Bullet_Group.update()
@@ -379,6 +403,7 @@ while True:
     jogo.draw()
     jogo.update()
     Game_over()
+    Boss_msg()
     txt_pontos = Mgs_Game(pontos, 50, (255,255,0))
     tela.blit(txt_pontos, (600, 30))
     pygame.display.update()

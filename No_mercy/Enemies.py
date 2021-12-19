@@ -22,7 +22,7 @@ sprite_enemy03 = pygame.image.load('img/enemy/monster_fly.png')
 sprite_monster04 = pygame.image.load('img/enemy/big_monster.png')
 Boss = False
 pontos = 0
-veloc_jogo = 4
+veloc_jogo = 6
 
 
 class Enemy01(pygame.sprite.Sprite):
@@ -140,4 +140,5 @@ class Monster_fly(pygame.sprite.Sprite):
 
     def draw(self):
         self.rect.x = randrange(-400, -100, 100)
+
 
