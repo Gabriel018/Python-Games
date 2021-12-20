@@ -24,9 +24,9 @@ sprites_enemy01 = pygame.image.load('img/enemy/monster02.png')
 pontos = 0
 
 game_over = False
-boss = False
 Mgs_Boss = False
 game_timer = 0
+boss = 0
 
 #Menssenger
 def Mgs_Game(msg,size,color):
@@ -56,9 +56,6 @@ def Game_over():
 
 def restart():
 
-    music_fundo = pygame.mixer.music.load('music/music-battle.mp3')
-    pygame.mixer.music.set_volume(0.3)
-    pygame.mixer.music.play(-1)
     #choice
     choice_enemy = choice([1, 2, 3, 4])
     enemy.rect.x = randrange(800, 1200, 90)
@@ -69,8 +66,9 @@ def restart():
     enemy_lagarto.escolha = choice_enemy
     enemy_contra.escolha = choice_enemy
     enemy_fly.escolha = choice_enemy
-
-
+    music_fundo = pygame.mixer.music.load('music/music-battle.mp3')
+    pygame.mixer.music.set_volume(0.3)
+    pygame.mixer.music.play(-1)
 
 class Jogo(pygame.sprite.Sprite):
 
@@ -260,21 +258,17 @@ Fundo_Group.add(plano_fund)
 Group_All_Enemy = pygame.sprite.Group()
 Group_All_Enemy.add(enemy,enemy_contra,enemy_lagarto,enemy_fly)
 
-relogio = pygame.time.Clock()
 
 FPS = 60
 
 while True:
-    print(boss)
-    print(big_monster.live)
-    relogio.tick(30)
-    relogio.get_time()
+
     colission = pygame.sprite.spritecollide(enemy,Bullet_Group,False)
     colission1 = pygame.sprite.spritecollide(enemy_contra,Bullet_Group,False)
     colission2 = pygame.sprite.spritecollide(enemy_lagarto,Bullet_Group,False)
     colission3 = pygame.sprite.spritecollide(enemy_fly,Bullet_Group,False)
     colission_player = pygame.sprite.spritecollide(jogo,Group_All_Enemy,True)
-
+    colission_playe1 = pygame.sprite.spritecollide(big_monster, Group_All_Enemy, True)
     colission_big = pygame.sprite.spritecollide(big_monster,Bullet_Group,False)
 
     #Sounds
@@ -318,7 +312,7 @@ while True:
         enemy_fly.draw()
         enemy_fly_sound.play()
 
-    if colission_player:
+    if colission_player or colission_playe1:
           game_over = True
           pontos = 0
           jogo.rect.x = 0
@@ -335,10 +329,9 @@ while True:
         big_monster_sound.play()
 
 
-    if big_monster.live <= 10:
+    if big_monster.live <= 10.00:
+        big_monster.kill()
         boss = False
-
-
 
     if pontos == 50:
        Mgs_Boss = True
@@ -376,6 +369,7 @@ while True:
     # Restart
     if key[pygame.K_r] and game_over == True:
         game_over = False
+        boss = False
         pygame.mixer.music.stop()
         restart()
 
@@ -400,10 +394,12 @@ while True:
     Enemy_Group04.draw(tela)
     Enemy_Group04.update()
 
-    if  game_over == False and boss == False :
+    if  game_over == False  and  boss == False :
        Group_All_Enemy.draw(tela)
        Group_All_Enemy.update()
 
+
+    print(game_over,boss)
     Bullet_Group.draw(tela)
     Bullet_Group.update()
 
