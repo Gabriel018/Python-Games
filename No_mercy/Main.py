@@ -312,7 +312,7 @@ while True:
         enemy_fly.draw()
         enemy_fly_sound.play()
 
-    if colission_player or colission_playe1:
+    if colission_player  :
           game_over = True
           pontos = 0
           jogo.rect.x = 0
@@ -399,7 +399,7 @@ while True:
        Group_All_Enemy.update()
 
 
-    print(game_over,boss)
+
     Bullet_Group.draw(tela)
     Bullet_Group.update()
 
