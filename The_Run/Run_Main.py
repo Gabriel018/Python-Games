@@ -2,8 +2,10 @@ import pygame
 import sys
 from random import randrange,choice
 
+altura = 800
+largura = 400
 
-tela = pygame.display.set_mode((800,400))
+tela = pygame.display.set_mode((altura,largura))
 
 pygame.init()
 #Config
@@ -77,15 +79,14 @@ class Car_blue(pygame.sprite.Sprite):
       if self.escolha == 1:
          self.rect.y += randrange(1, 3, 1)
          if self.rect.y >= 410 or self.rect.x <= 100:
-            self.escolha = choice_car
             self.rect.y = 100
+            self.rect.x = randrange(320, 360, 1)
          if self.rect.y >= 200:
             self.image = pygame.transform.scale(self.image, (58*2, 46*2))
          else:
             self.image = pygame.transform.scale(self.image, (58,46))
 
-    def draw(self):
-        self.rect.x = randrange(320, 360, 1)
+
 
 
 class Car_yellow(pygame.sprite.Sprite):
@@ -104,20 +105,18 @@ class Car_yellow(pygame.sprite.Sprite):
     def update(self):
       if self.escolha == 2:
          self.rect.y +=  randrange(1, 4, 1)
-         if self.rect.y >= 450 or self.rect.x <= 100:
-            self.escolha = choice_car
+         if self.rect.y >= 410 or self.rect.x <= 100:
             self.rect.x = randrange(320, 360, 1)
             self.rect.y = 100
-         if self.rect.y >= 290:
+         if self.rect.y >= 270:
            self.rect.x  = 390
-           self.image=   pygame.transform.scale(self.image,(40*2,30*2))
+           self.image=   pygame.transform.scale(self.image,(50*2,40*2))
          else:
             self.image = pygame.transform.scale(self.image, (58,46))
 
-    def draw(self):
-        self.rect.x = randrange(320, 360, 1)
 
 
+#Groups
 Car_group = pygame.sprite.Group()
 car_player = Car()
 Car_group.add(car_player)
@@ -159,10 +158,16 @@ while True:
              pygame.quit()
              sys.exit()
 
+     #choice
+     if  car_blue.rect.top >=400  or car_yellow.rect.top >=400:
+         choice_car = choice([1,2])
+         car_yellow.rect.y = 100
+         car_blue.rect.y = 100
+         car_blue.escolha = choice_car
+         car_yellow.escolha = choice_car
+     # collision
      colision = pygame.sprite.spritecollide(car_player,Car_group01,False)
 
-
-     #collision
      if colision:
          break
 
@@ -192,7 +197,7 @@ while True:
      if choice_car == 1:
       Car_group01.draw(tela)
       Car_group01.update()
-     if choice_car == 2:
+     if choice_car ==2:
       Car_group02.draw(tela)
       Car_group02.update()
 
