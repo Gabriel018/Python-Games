@@ -12,11 +12,14 @@ pygame.init()
 Pontos = 0
 game_over = False
 Ready = False
-Start = False
+
 Timer = 0
 choice_car = choice([1,2])
 
 vel_jogo = 3
+
+fundo = pygame.image.load('img/fundo.png')
+fundo = pygame.transform.scale(fundo,(351 * 3,37 * 3))
 
 Sprite_road  = pygame.image.load('img/road1.png')
 Sprite_road1 =  pygame.image.load('img/car01.png')
@@ -24,6 +27,23 @@ Sprite_road2 = pygame.image.load('img/car_blue.png')
 Sprite_road3 = pygame.image.load('img/car_yellow.png')
 
 Sprite_Veloc = pygame.image.load('img/velocimetro.png')
+
+def Start():
+ if Ready == False:
+    font = pygame.font.SysFont('Lobster', 100)
+    Game_over_txt = font.render('The Run', False, (139,0,0))
+    tela.fill((0,0,0))
+    tela.blit(Game_over_txt, (250, 80))
+
+    font1 = pygame.font.SysFont('Lobster', 40)
+    Game_over_Enter = font1.render('Press Space to start', False, (139,0,0))
+    tela.blit(Game_over_Enter, (250, 160))
+
+    Game_over_Sair = font1.render('Press up arrow to acelerate', False, (139, 0, 0))
+    tela.blit(Game_over_Sair, (250, 200))
+
+    Game_over_Sair = font1.render('Press Q to get out', False, (139,0,0))
+    tela.blit(Game_over_Sair, (250, 240))
 
 def Mgs_Game(msg,size,color):
     font =  pygame.font.SysFont('Arial',30)
@@ -41,7 +61,7 @@ def Game_over():
     tela.blit(Game_over_txt,(250,100))
 
     font = pygame.font.SysFont('Lobster', 50)
-    Game_over_txt = font.render('Aperte R para reiniciar...', False, (255,255,255))
+    Game_over_txt = font.render('Press R to restart...', False, (255,255,255))
     tela.blit(Game_over_txt, ( 200, 200))
 
 class Road(pygame.sprite.Sprite):
@@ -138,7 +158,7 @@ class Car_yellow(pygame.sprite.Sprite):
              self.image = self.sprites_road[self.image_atual]
 
 
-class Veloc(pygame.sprite.Sprite):
+class speedometer(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.sprites_veloc = []
@@ -151,8 +171,6 @@ class Veloc(pygame.sprite.Sprite):
          self.rect.x = 0
          self.rect.y = 270
          self.image = pygame.transform.scale(self.image, (461 / 3, 550 / 3))
-
-
 
     def update(self):
      if key[pygame.K_UP] and self.image_atual <= 27:
@@ -170,7 +188,7 @@ car_player = Car()
 Car_group.add(car_player)
 
 Veloc_group = pygame.sprite.Group()
-veloc = Veloc()
+veloc = speedometer()
 Veloc_group.add(veloc)
 
 
@@ -181,7 +199,6 @@ Car_group01.add(car_blue)
 Car_group02 = pygame.sprite.Group()
 car_yellow = Car_yellow()
 Car_group02.add(car_yellow)
-
 
 
 Road_group = pygame.sprite.Group()
@@ -195,15 +212,16 @@ All_Cars_Group.add(car_yellow,car_blue)
 FPS = 60
 relogio = pygame.time.Clock()
 #Sounds
+ready_sound = pygame.mixer.Sound('music/ready.wav')
 game_over_sounde = pygame.mixer.Sound('music/game_over.wav')
 crash_sound = pygame.mixer.Sound('music/crash.wav')
 intro = pygame.mixer.music.load('music/intro.ogg')
 pygame.mixer.music.play(-1)
-pygame.mixer.music.set_volume(0.8)
 motor_car_red = pygame.mixer.Sound('music/motor.wav')
 motor_car_red.set_volume(0.6)
 
 while True:
+
      relogio.tick(30)
      tela.fill((0,0,0))
      for event in pygame.event.get():
@@ -254,7 +272,12 @@ while True:
          car_blue.escolha = choice_car
          car_yellow.escolha = choice_car
 
+     if key[pygame.K_SPACE ]:
+        Ready = True
+        ready_sound.play()
 
+     if key[pygame.K_q]:
+         quit()
 
      Road_group.draw(tela)
      Road_group.update()
@@ -265,17 +288,24 @@ while True:
      Veloc_group.draw(tela)
      Veloc_group.update()
 
-     if choice_car == 1 and game_over == False :
+     if choice_car == 1 and game_over == False and Ready == True:
       Car_group01.draw(tela)
       Car_group01.update()
 
 
-     if choice_car == 2 and game_over == False :
+     if choice_car == 2 and game_over == False and Ready == True :
        Car_group02.draw(tela)
        Car_group02.update()
 
+
+     Start()
      Game_over()
      Pontos += 1
-     txt_pontos = Mgs_Game(Pontos, 100, (255, 255, 0))
-     tela.blit(txt_pontos, (0, 250))
+     #Score
+     if Ready == True:
+         txt_pontos = Mgs_Game(Pontos, 100, (255, 255, 0))
+         tela.blit(txt_pontos, (0, 250))
+         txt_pontos = Mgs_Game(Pontos, 100, (255, 255, 0))
+         tela.blit(txt_pontos, (0, 250))
+         tela.blit(fundo, (0, 0))
      pygame.display.update()
