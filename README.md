@@ -1,7 +1,7 @@
 # Repositorio simples, de jogos feitos em Python
 ______
 
-* The Run (Demo) um  jogo simples de corrida estilo Ray casting
+ ## The Run (Demo) um  jogo simples de corrida estilo Ray casting
 
 #### Requisitos 
 
@@ -15,7 +15,7 @@ ______
 </a>
 
 
-* No Mercy_Demo
+## No Mercy_Demo
 
 ### Jogo Demo , que tem como simples funçao testar as funçoes basicas(colisao,som,movimentaçao) da biblioteca Pygame,
 
