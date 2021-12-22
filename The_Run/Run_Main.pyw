@@ -179,7 +179,7 @@ class speedometer(pygame.sprite.Sprite):
          self.image = pygame.transform.scale(self.image, (461 / 3, 550 / 3))
      if not key[pygame.K_UP]:
          self.image_atual = 0
-         print(self.image_atual)
+         
 
 
 #Groups
