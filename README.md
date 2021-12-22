@@ -10,11 +10,13 @@ ______
 * from random import randrange,choice,random,randint
 
 
-![The_Run](https://user-images.githubusercontent.com/42377719/147045261-8bf4d6c6-658f-480f-820e-82e321c385b3.gif)
+<a href="The_Run" target="_blank">
+<img src="The_Run/img/The_Run.gif" width="78%">
+</a>
 
 
 
-
+The_Run/img/The_Run.gif
 
 * No Mercy_Demo
 ### Jogo Demo , que tem como simples funçao testar as funçoes basicas(colisao,som,movimentaçao) da biblioteca Pygame,
