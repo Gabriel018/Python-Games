@@ -23,9 +23,19 @@ Sprite_road1 =  pygame.image.load('img/car01.png')
 Sprite_road2 = pygame.image.load('img/car_blue.png')
 Sprite_road3 = pygame.image.load('img/car_yellow.png')
 
+Sprite_Veloc = pygame.image.load('img/velocimetro.png')
+
+def Mgs_Game(msg,size,color):
+    font =  pygame.font.SysFont('Arial',30)
+    mensagem = f'Score {msg}'
+    txt_format = font.render(mensagem,True,color)
+    return  txt_format
 
 def Game_over():
  if game_over == True:
+    Pontos = 0
+    pygame.mixer.music.stop()
+    game_over_sounde.play()
     font = pygame.font.SysFont('Lobster', 90)
     Game_over_txt = font.render('Game Over',False,(255,255,255))
     tela.blit(Game_over_txt,(250,100))
@@ -56,11 +66,11 @@ class Road(pygame.sprite.Sprite):
 
        def update(self):
          #if self.mover == True:
-           self.image_atual = (self.image_atual + 1) % 4
+           self.image_atual = (self.image_atual + 0.1) % 4
            self.image = self.sprites_road[int(self.image_atual)]
            self.image = pygame.transform.scale(self.image, (800, 400))
-         #if not  key[pygame.K_UP]:
-            # self.mover = False
+           if   key[pygame.K_UP]:
+               self.image_atual = (self.image_atual + 1) % 4
 
 class Car(pygame.sprite.Sprite):
     def __init__(self):
@@ -99,7 +109,6 @@ class Car_blue(pygame.sprite.Sprite):
             self.rect.x = randrange(330,400,300)
             self.image = pygame.transform.scale(self.image, (48*2, 36*2))
          else:
-            self.image = pygame.transform.scale(self.image, (58,46))
             self.rect.x = 360
 
 
@@ -129,11 +138,40 @@ class Car_yellow(pygame.sprite.Sprite):
              self.image = self.sprites_road[self.image_atual]
 
 
+class Veloc(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.sprites_veloc = []
+        for i in range(0,30):
+         img = Sprite_Veloc.subsurface((i * 440, 00), (461, 550))
+         self.sprites_veloc.append(img)
+         self.image_atual = 0
+         self.image = self.sprites_veloc[self.image_atual]
+         self.rect = self.image.get_rect()
+         self.rect.x = 0
+         self.rect.y = 270
+         self.image = pygame.transform.scale(self.image, (461 / 3, 550 / 3))
+
+
+
+    def update(self):
+     if key[pygame.K_UP] and self.image_atual <= 27:
+         self.image_atual = (self.image_atual + 1) % 30
+         self.image = self.sprites_veloc[int(self.image_atual)]
+         self.image = pygame.transform.scale(self.image, (461 / 3, 550 / 3))
+     if not key[pygame.K_UP]:
+         self.image_atual = 0
+         print(self.image_atual)
+
 
 #Groups
 Car_group = pygame.sprite.Group()
 car_player = Car()
 Car_group.add(car_player)
+
+Veloc_group = pygame.sprite.Group()
+veloc = Veloc()
+Veloc_group.add(veloc)
 
 
 Car_group01 = pygame.sprite.Group()
@@ -157,12 +195,13 @@ All_Cars_Group.add(car_yellow,car_blue)
 FPS = 60
 relogio = pygame.time.Clock()
 #Sounds
+game_over_sounde = pygame.mixer.Sound('music/game_over.wav')
 crash_sound = pygame.mixer.Sound('music/crash.wav')
 intro = pygame.mixer.music.load('music/intro.ogg')
 pygame.mixer.music.play(-1)
 pygame.mixer.music.set_volume(0.8)
 motor_car_red = pygame.mixer.Sound('music/motor.wav')
-motor_car_red.set_volume(0.8)
+motor_car_red.set_volume(0.6)
 
 while True:
      relogio.tick(30)
@@ -183,33 +222,32 @@ while True:
      colision = pygame.sprite.spritecollide(car_player,Car_group01,False)
      colision1 = pygame.sprite.spritecollide(car_player,Car_group02,False)
 
-     if colision :
+     if colision or colision1 :
+        Pontos = 0
         game_over = True
-
-     if colision1:
-        game_over = True
-
 
      #Controls
      key = pygame.key.get_pressed()
      if key[pygame.K_UP]:
-        car_player.rect.y = 301
-        motor_car_red.play()
-        road.moverr()
-     else:
-         motor_car_red.stop()
+         motor_car_red.play()
+         road.moverr()
+         car_player.rect.y = 301
+         vel_jogo = 4
+     if not  key[pygame.K_UP]:
+         vel_jogo = 1
+
      if key[pygame.K_LEFT]:
          car_player.rect.x -= 5
          if car_player.rect.x <= 120:
              car_player.rect.x = 120
+
      if key[pygame.K_RIGHT]:
          car_player.rect.x += 5
          if car_player.rect.x  >= 620:
              car_player.rect.x = 620
 
-     if key[pygame.K_SPACE]:
+     if key[pygame.K_r]:
          game_over = False
-
          choice_car = choice([1, 2])
          car_yellow.rect.y = 100
          car_blue.rect.y = 100
@@ -217,13 +255,15 @@ while True:
          car_yellow.escolha = choice_car
 
 
-     print(game_over)
+
      Road_group.draw(tela)
      Road_group.update()
 
      Car_group.draw(tela)
      Car_group.update()
 
+     Veloc_group.draw(tela)
+     Veloc_group.update()
 
      if choice_car == 1 and game_over == False :
       Car_group01.draw(tela)
@@ -235,5 +275,7 @@ while True:
        Car_group02.update()
 
      Game_over()
-
+     Pontos += 1
+     txt_pontos = Mgs_Game(Pontos, 100, (255, 255, 0))
+     tela.blit(txt_pontos, (0, 250))
      pygame.display.update()
