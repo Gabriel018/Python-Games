@@ -6,7 +6,7 @@ altura = 800
 largura = 400
 
 tela = pygame.display.set_mode((altura,largura))
-
+pygame.display.set_caption('The_Run')
 pygame.init()
 #Config
 Pontos = 0

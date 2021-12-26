@@ -1,10 +1,8 @@
 import pygame,sys,os,random
-
+from pygame import *
 from pygame.locals import *
-
 level = 1
 lines_to_clear = 1
-GREY = (128, 128, 128)
 colors = [ (10,10,10),
           (30,30,30),
           (40,40,40),
@@ -20,10 +18,11 @@ class Jogo():
     field  = []
     start_x  = 100
     start_y = 50
-    zoom = 20
+    zoom = 25
     Altura = 0
     Largura = 0
     figure = None
+
     state =  "start"
     pontos = 0
 
@@ -39,6 +38,12 @@ class Jogo():
                 new_line.append(0)
             self.field.append(new_line)
 
+    def ready_game(self):
+        ready = False
+        font = pygame.font.SysFont('Comic Sans MS', 50, bold=True)
+        text_ready = font1.render("Ready!!!", True, (0, 0, 0))
+        janela.blit(text_ready, [250, 20])
+
     def create_picture(self):
        self.figure = Picture(3,0)
 
@@ -46,7 +51,7 @@ class Jogo():
        colision = False
        for i in range(4):
            for j in range(4):
-               if (i * 4) + j in self.figure.get_img():  # making sure tiles containing figure are not 0
+               if (i * 4) + j in self.figure.get_img():  # certificando-se de que os blocos contendo figura não são 0
                    if (i + self.figure.y) > (self.altura - 1) or \
                            (j + self.figure.x) > (self.largura - 1) or \
                            (j + self.figure.x) < 0 or \
@@ -56,10 +61,12 @@ class Jogo():
        return colision
 
     def stop_figure(self):
+        colision_sound = pygame.mixer.Sound('sound/sound1.wav')
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in self.figure.get_img():
                     self.field[i + self.figure.y][j + self.figure.x] = self.figure.color
+                    colision_sound.play()
         self.break_line()
         self.create_picture()
         if self.colision():
@@ -127,13 +134,13 @@ class Picture:
           | 8 | 9 | 10 | 11 |
           | 12 | 13 | 14 | 15 |"""
 
-        Figures = [ [[4,5,6,7],[1,5,9,13]],  #Linha
-                 [[1,4,5,6],[1,4,5,9],[4,5,6,9],[1,5,6,9]], #Piramide
-                 [[1, 2, 5, 9], [0, 4, 5, 6], [1, 5, 8, 9], [4, 5, 6, 10]], #Left tetromino
-                 [[1, 2, 6, 10], [3, 5, 6, 7], [2, 6, 10, 11], [5, 6, 7, 9]], #Right tetromino
-                 [[5,6,9,10]], #quadrado
-                 [[1, 2, 4, 5], [0, 4, 5, 6], [1, 5, 8, 9], [4, 5, 6, 10]],
-                 [[1, 2, 6, 7], [3, 6, 7, 10], [5, 6, 10, 11], [2, 5, 6, 9]],
+        Figures = [ [[4, 5, 6, 7], [1, 5, 9, 13]], #Line
+            [[1, 4, 5, 6], [1, 4, 5, 9], [4, 5, 6, 9], [1, 5, 6, 9]], # pyramid
+            [[1, 2, 5, 9], [0, 4, 5, 6], [1, 5, 8, 9], [4, 5, 6, 10]], # left tetromino
+            [[1, 2, 6, 10], [3, 5, 6, 7], [2, 6, 10, 11], [5, 6, 7, 9]], # right tetromino
+            [[5, 6, 9, 10]], #square
+            [[1, 2, 4, 5], [0, 4, 5, 9], [5, 6, 8, 9], [1, 5, 6, 10]], # left zig-zag stetromino
+            [[1, 2, 6, 7], [3, 6, 7, 10], [5, 6, 10, 11], [2, 5, 6, 9]]
 
         ]
 
@@ -147,14 +154,14 @@ class Picture:
         def get_img(self):
             return self.Figures[self.type][self.rotation]
 
-        # increments to the next rotation of any type of figure
+        # incrementa para a próxima rotação de qualquer tipo de figurae
         def rotate(self):
             self.rotation = (self.rotation + 1) % (len(self.Figures[self.type]))
 def main():
   global  level
   global lines_to_clear
-  altura = 400
   largura = 500
+  altura = 600
   game_altura = 20
   game_largura = 10
   press_down = False
@@ -164,11 +171,16 @@ def main():
 
 
   pygame.init()
-  janela = pygame.display.set_mode((altura,largura))
+  theme = pygame.mixer.music.load('sound/Theme.mp3')
+  pygame.mixer.music.play(-1)
+  pygame.display.set_caption('Tetris')
+  janela = pygame.display.set_mode((largura,altura))
   relogio = pygame.time.Clock()
   game = Jogo(game_altura,game_largura)
+  ready = False
 
   while not gameover:
+
       if game.figure is None:
           game.create_picture()
       counter += 1
@@ -194,59 +206,69 @@ def main():
                   press_down = True
               if event.key == pygame.K_SPACE:
                   game.go_space()
+              if event.key == pygame.K_s:
+                  ready = True
               if event.key == pygame.K_ESCAPE:
                   pygame.quit()
                   sys.exit(0)
 
-      if event.type == pygame.KEYUP:  # event is saved in memory so we can access event outside the for loop
+      if event.type == pygame.KEYUP:  # o evento é salvo na memória para que possamos acessar o evento fora do loop for
             if event.key == pygame.K_DOWN:
                     press_down = False
 
       janela.fill((255,255,255))
+      if ready == True:
+         # isto é usado para desenhar uma grade cinza na janela
+          for i in range(game.altura):
+                for j in range(game.largura):
+                      pygame.draw.rect(janela,((0,0,0)),[game.start_x + game.zoom * j, game.start_y + game.zoom * i, game.zoom, game.zoom],
+                                       1)  # last arg is for line thickness
+                      if game.field[i][j] > 0:
+                          pygame.draw.rect(janela, colors[game.field[i][j]],
+                                [game.start_x + game.zoom * j, game.start_y + game.zoom * i, game.zoom - 2,
+                                    game.zoom - 1])
 
-      # this is used to draw grey grid on window
-      for i in range(game.altura):
-            for j in range(game.largura):
-                  pygame.draw.rect(janela,GREY,[game.start_x + game.zoom * j, game.start_y + game.zoom * i, game.zoom, game.zoom],
-                                   1)  # last arg is for line thickness
-                  if game.field[i][j] > 0:
-                      pygame.draw.rect(janela, colors[game.field[i][j]],
-                            [game.start_x + game.zoom * j, game.start_y + game.zoom * i, game.zoom - 2,
-                                game.zoom - 1])
+              # isso é usado para desenhar a figura atual em uma matriz 4x4 no jogo gri
+          if game.figure is not None:
+                  for i in range(4):
+                      for j in range(4):
+                          p = i * 4 + j
+                          if p in game.figure.get_img():
+                              pygame.draw.rect(janela, colors[game.figure.color],
+                                               [
+                                                   game.start_x + game.zoom * (j + game.figure.x) + 1,
+                                                   game.start_y + game.zoom * (i + game.figure.y) + 1,
+                                                   game.zoom - 2,
+                                                   game.zoom - 2
+                                               ])
 
-          # this is used to draw current figure on a 4x4 matrix in game grid
-      if game.figure is not None:
-              for i in range(4):
-                  for j in range(4):
-                      p = i * 4 + j
-                      if p in game.figure.get_img():
-                          pygame.draw.rect(janela, colors[game.figure.color],
-                                           [
-                                               game.start_x + game.zoom * (j + game.figure.x) + 1,
-                                               game.start_y + game.zoom * (i + game.figure.y) + 1,
-                                               game.zoom - 2,
-                                               game.zoom - 2
-                                           ])
-
-      font2 = pygame.font.SysFont('Consolas', 11, bold=True)
-      font1 = pygame.font.SysFont('Comic Sans MS', 11, bold=True)
-      text_score = font1.render("Score: " + str(game.pontos), True,(0,0,0))
+      font2 = pygame.font.SysFont('Comic Sans MS', 20, bold=True)
+      font1 = pygame.font.SysFont('Comic Sans MS', 20, bold=True)
+      text_score = font1.render("Pontos: " + str(game.pontos), True,(0,0,0))
       text_level = font1.render("Level: " + str(level), True, (0,0,0))
-      text_lines_to_clear = font1.render("Lines to clear: " + str(lines_to_clear), True, (0,0,0))
+
       text_game_over1 = font1.render("Game Over", True, (0,0,0))
       text_game_over2 = font1.render("Press ESC", True,(0,0,0))
 
-      janela.blit(text_score, [100, 20])  # second arg is represents dest where [top, left]
-      janela.blit(text_lines_to_clear, [250, 20])
-      janela.blit(text_level, [250, 5])
+      janela.blit(text_level, [100, 20])
+      janela.blit(text_score, [250, 20])
+
       if game.check_level():
               main()
       if game.state == "gameover":
-              janela.blit(text_game_over1, [20, 220])
-              janela.blit(text_game_over2, [20, 275])
-      pygame.display.flip()
-      relogio.tick(fps)  # paces the game to a slower fall speed
+              janela.blit(text_game_over1, [10, 200])
+              janela.blit(text_game_over2, [350, 200])
 
+      if ready == False:
+          font = pygame.font.SysFont('Arial', 60, bold=True)
+          font1 = pygame.font.SysFont('Arial', 40, bold=True)
+          text_ready = font.render("Ready", True, (0, 0, 0))
+          text_ready1 = font1.render("Press S to Start", True, (0, 0, 0))
+          janela.blit(text_ready, [150, 200])
+          janela.blit(text_ready1,[80,270])
+
+      pygame.display.flip()
+      relogio.tick(fps)  # ritma o jogo para uma velocidade de queda mais lenta
 
 if __name__ == '__main__':
     main()
